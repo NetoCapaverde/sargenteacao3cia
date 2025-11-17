@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Sistema de Gestão da Sargenteação – PMPR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- PWA -->
+  <meta name="theme-color" content="#245025">
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f4f4;
+    }
+    header {
+      background: #245025; /* verde PMPR */
+      color: #f7f3c6;      /* amarelo claro */
+      padding: 10px 20px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    nav {
+      background: #1b3a1b;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      padding: 6px 10px;
+      position: relative;
+      z-index: 20;
+    }
+    .nav-item {
+      position: relative;
+      display: inline-block;
+    }
+    nav > button,
+    nav .nav-item > button {
+      border: none;
+      background: transparent;
+      color: #e8f2d0;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    nav button.active {
+      background: #f7c843; /* mostarda */
+      color: #1b3a1b;
+    }
+    .nav-sub {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: 100%;
+      background: #1b3a1b;
+      padding: 4px;
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      flex-direction: column;
+      gap: 4px;
+      min-width: 180px;
+    }
+    .nav-item:hover .nav-sub {
+      display: flex;
+    }
+    .nav-sub button {
+      background: #2a4c2a;
+      font-size: 13px;
+      color: #e8f2d0;
+      width: 100%;
+      text-align: left;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer; /* mãozinha nas subabas */
+    }
+
+    main {
+      padding: 15px 15px 40px 15px;
+    }
+    .tab { display: none; }
+    .tab.active { display: block; }
+
+    .card {
+      background: white;
+      border-radius: 6px;
+      padding: 12px 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+      margin-bottom: 15px;
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #1b3a1b;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    label {
+      font-size: 13px;
+      font-weight: bold;
+      display: block;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 6px;
+      margin-top: 2px;
+      font-size: 13px;
+    }
+    textarea { resize: vertical; }
+    button.btn {
+      border: none;
+      border-radius: 4px;
+      padding: 7px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 8px;
+      margin-right: 6px;
+    }
+    .btn-primary { background: #245025; color: #fff; }
+    .btn-secondary { background: #d0d6c7; color: #1b3a1b; }
+    .btn-danger { background: #c0392b; color: #fff; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 4px 6px;
+      text-align: left;
+    }
+    th { background: #ecefe3; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 10px;
+    }
+    .badge-ok { background: #2ecc71; color: #fff; }
+    .badge-alert { background: #e67e22; color: #fff; }
+    .badge-bx { background: #e74c3c; color: #fff; }
+
+    .small {
+      font-size: 11px;
+      color: #555;
+    }
+
+    .quadro-blocos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .quadro-bloco {
+      border: 1px solid #dcdcdc;
+      border-radius: 5px;
+      padding: 8px;
+      background: #fafafa;
+    }
+    .quadro-bloco h3 {
+      margin: 0 0 6px;
+      font-size: 14px;
+      color: #1b3a1b;
+      text-align: center;
+    }
+    .quadro-equipes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 8px;
+    }
+    .quadro-equipe {
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 4px;
+      background: #fff;
+    }
+    .quadro-equipe h4 {
+      margin: 0 0 4px;
+      font-size: 13px;
+      text-align: center;
+      color: #245025;
+    }
+    .quadro-equipe ul {
+      list-style: none;
+      padding-left: 4px;
+      margin: 0 0 4px;
+    }
+    .quadro-equipe li {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+    .quadro-equipe li .badge {
+      font-weight: normal;
+      font-size: 10px;
+    }
+    .quadro-equipe li button {
+      margin-left: 4px;
+      font-size: 10px;
+      padding: 2px 4px;
+    }
+
+    .quadro-comandante {
+      max-width: 320px;
+      margin: 10px auto;
+    }
+    .quadro-comandante-inner {
+      text-align: center;
+    }
+    .quadro-comandante-inner strong {
+      font-size: 14px;
+    }
+
+    .resumo-indicadores {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0;
+      font-size: 12px;
+    }
+    .resumo-indicadores div {
+      background: #f1f4e8;
+      border-radius: 4px;
+      padding: 4px 8px;
+    }
+
+    /* Subabas internas (Salvar Informações) */
+    .subtab-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .subtab-btn {
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+      background: #d0d6c7;
+      color: #1b3a1b;
+    }
+    .subtab-btn.active {
+      background: #245025;
+      color: #fff;
+    }
+    .subtab { display: none; }
+    .subtab.active { display: block; }
+
+    /* Lousa de Trabalho */
+    .lousa-lista {
+      max-height: 400px;
+      overflow-y: auto;
+      border-top: 1px solid #ddd;
+      padding-top: 6px;
+    }
+    .lousa-msg {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 6px;
+      margin-bottom: 6px;
+      background: #fcfcfc;
+      font-size: 13px;
+    }
+    .lousa-meta {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    /* Rodapé créditos */
+    .footer-credit {
+      font-size: 11px;
+      color: #777;
+      text-align: right;
+      padding: 6px 10px 10px;
+    }
+
+    @media print {
+      header, nav, .no-print {
+        display: none !important;
+      }
+      body { background: #fff; }
+      main { padding: 0; }
+      .card {
+        box-shadow: none;
+        margin-bottom: 4px;
+        padding: 6px;
+      }
+      .footer-credit {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sistema de Gestão da Sargenteação – PMPR</h1>
+  </header>
+
+  <nav>
+    <!-- QUADRO GERAL COM SUBABAS -->
+    <div class="nav-item">
+      <button data-tab="quadro" class="active">Quadro Geral</button>
+      <div class="nav-sub">
+        <button data-tab="cadastro">Cadastrar Militar</button>
+        <button data-tab="ajuste">Ajuste de equipes</button>
+        <button data-tab="salvar">Salvar Informações</button>
+        <button data-tab="lousa">Lousa de Trabalho</button>
+      </div>
+    </div>
+
+    <!-- VIATURAS -->
+    <button data-tab="viaturas">Viaturas</button>
+
+    <!-- SITUAÇÕES COM SUBABA PLANO DE FÉRIAS -->
+    <div class="nav-item">
+      <button data-tab="situacoes">Lançar Situação do Militar</button>
+      <div class="nav-sub">
+        <button data-tab="ferias">Plano de Férias</button>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <!-- =============== QUADRO GERAL =============== -->
+    <section id="tab-quadro" class="tab active">
+      <div class="card">
+        <h2>Quadro Geral</h2>
+        <p class="small">
+          Aqui você define quem é RPA (Equipes com Permanência), Administrativo (Comandante, Adjunto,
+          Sargenteante, Auxiliar de Transportes, etc.), Supletiva/Tático e Comercial, além de ver
+          um resumo de efetivo disponível e indisponível hoje.
+        </p>
+
+        <div id="quadro-resumo" class="resumo-indicadores"></div>
+
+        <div class="quadro-bloco quadro-comandante">
+          <h3>Comandante da Companhia</h3>
+          <div id="quadro-comandante" class="quadro-comandante-inner"></div>
+        </div>
+
+        <div class="quadro-bloco">
+          <h3>RPA – Equipes</h3>
+          <div class="quadro-equipes" id="quadro-rpa"></div>
+        </div>
+
+        <div class="quadro-blocos">
+          <div class="quadro-bloco">
+            <h3>Administrativo</h3>
+            <div class="quadro-equipes" id="quadro-adm-funcoes"></div>
+          </div>
+          <div class="quadro-bloco">
+            <h3>Supletiva / Tático (Equipes)</h3>
+            <div class="quadro-equipes" id="quadro-suptat"></div>
+          </div>
+          <div class="quadro-bloco">
+            <h3>Comercial (Equipes)</h3>
+            <div class="quadro-equipes" id="quadro-com"></div>
+          </div>
+          <div class="quadro-bloco">
+            <h3>Policiais indisponíveis (hoje)</h3>
+            <table id="quadro-indisp"></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============== AJUSTE DE EQUIPES (subaba de Quadro Geral) =============== -->
+    <section id="tab-ajuste" class="tab">
+      <div class="card">
+        <h2>Ajuste de Equipes e Funções</h2>
+        <p class="small">
+          Defina a quantidade de equipes de RPA, Supletiva/Tático e Comercial, e cadastre/remova
+          funções do Administrativo. Ao reduzir o número de equipes ou excluir uma função, os
+          militares envolvidos voltam a ficar disponíveis.
+        </p>
+        <div id="quadro-config"></div>
+      </div>
+    </section>
+
+    <!-- =============== SALVAR INFORMAÇÕES (subaba de Quadro Geral) =============== -->
+    <section id="tab-salvar" class="tab">
+      <div class="card">
+        <h2>Salvar Informações</h2>
+        <p class="small">
+          Aqui você faz backup dos dados (para levar para outro computador ou guardar no Drive) ou
+          importa dados que foram exportados anteriormente.
+        </p>
+
+        <div class="subtab-bar no-print">
+          <button class="subtab-btn active" data-subtab="exportar">Exportar dados</button>
+          <button class="subtab-btn" data-subtab="importar">Importar dados</button>
+        </div>
+
+        <!-- Subaba Exportar -->
+        <div id="subtab-exportar" class="subtab active">
+          <div class="card" style="margin-top:0;">
+            <h2>Exportar dados</h2>
+            <p class="small">
+              Este botão gera um arquivo <strong>.json</strong> com todos os militares, viaturas,
+              situações, férias e configurações de equipes/funções. Salve esse arquivo junto com o
+              .html no seu Google Drive ou pen drive.
+            </p>
+            <button class="btn btn-primary" onclick="exportarDados()">Exportar dados (.json)</button>
+            <p class="small" style="margin-top:8px;">
+              Sugestão de uso:<br>
+              1) Clique em <strong>Exportar dados</strong>;<br>
+              2) Salve o arquivo .json em uma pasta (ou no Drive);<br>
+              3) Leve esse .json e o .html para outro computador.
+            </p>
+          </div>
+        </div>
+
+        <!-- Subaba Importar -->
+        <div id="subtab-importar" class="subtab">
+          <div class="card" style="margin-top:0;">
+            <h2>Importar dados</h2>
+            <p class="small">
+              Selecione aqui um arquivo <strong>.json</strong> gerado pela função de exportar
+              dados deste sistema. Isso vai carregar militares, viaturas, situações, férias e
+              configurações que estavam em outro computador.
+            </p>
+            <input type="file" id="importar-arquivo" accept="application/json" style="margin-top:8px;">
+            <button class="btn btn-secondary" onclick="importarDados()">Importar dados</button>
+            <p class="small" style="margin-top:8px;">
+              Passos:<br>
+              1) Abra o .html no computador novo;<br>
+              2) Vá em <strong>Quadro Geral &gt; Salvar Informações &gt; Importar dados</strong>;<br>
+              3) Escolha o arquivo .json e clique em <strong>Importar dados</strong>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============== LOUSA DE TRABALHO (subaba de Quadro Geral) =============== -->
+    <section id="tab-lousa" class="tab">
+      <div class="card">
+        <h2>Lousa de Trabalho</h2>
+        <p class="small">
+          Use esta lousa como se fosse um grupo de WhatsApp consigo mesmo: anotações rápidas,
+          lembretes, ideias de operação, recados para o próximo serviço, etc.
+          Tudo fica salvo neste navegador.
+        </p>
+
+        <label>Nova anotação</label>
+        <textarea id="lousa-texto" rows="3" placeholder="Escreva algo e clique em &quot;Adicionar anotação&quot;..."></textarea>
+        <button class="btn btn-primary" onclick="adicionarLousaMsg()">Adicionar anotação</button>
+
+        <p class="small" style="margin-top:6px;">
+          As anotações mais recentes aparecem no topo. Você pode apagar qualquer uma quando quiser.
+        </p>
+
+        <div id="lousa-lista" class="lousa-lista" style="margin-top:10px;"></div>
+      </div>
+    </section>
+
+    <!-- =============== CADASTRAR MILITAR (subaba de Quadro Geral) =============== -->
+    <section id="tab-cadastro" class="tab">
+      <div class="card">
+        <h2>Cadastrar Militar</h2>
+        <div class="grid">
+          <div>
+            <label>Nome completo</label>
+            <input id="mil-nome" type="text">
+          </div>
+          <div>
+            <label>Nome de guerra</label>
+            <input id="mil-guerra" type="text">
+          </div>
+          <div>
+            <label>Posto / Graduação</label>
+            <input id="mil-pg" type="text" placeholder="Sd, Cb, 3º Sgt, etc.">
+          </div>
+          <div>
+            <label>Telefone</label>
+            <input id="mil-fone" type="text">
+          </div>
+          <div>
+            <label>CPF</label>
+            <input id="mil-cpf" type="text">
+          </div>
+          <div>
+            <label>Endereço</label>
+            <input id="mil-end" type="text">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="adicionarMilitar()">Salvar Militar</button>
+        <p class="small">
+          A função/modalidade do militar é definida no <strong>Quadro Geral</strong>, ao alocar em RPA, ADM,
+          Supletiva/Tático ou Comercial.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>Militares cadastrados</h2>
+        <table id="tabela-militares"></table>
+      </div>
+    </section>
+
+    <!-- =============== VIATURAS =============== -->
+    <section id="tab-viaturas" class="tab">
+      <div class="card">
+        <h2>Viaturas</h2>
+        <div class="grid">
+          <div>
+            <label>Prefixo / nº viatura</label>
+            <input id="vtr-prefixo" type="text" placeholder="Ex.: LR1005, 16167">
+          </div>
+          <div>
+            <label>Status</label>
+            <select id="vtr-status">
+              <option value="300">Em 300</option>
+              <option value="BX_CIA">Baixada na Cia</option>
+              <option value="BX_OF">Baixada na Oficina</option>
+            </select>
+          </div>
+          <div>
+            <label>Observação</label>
+            <input id="vtr-obs" type="text" placeholder="Ex.: Oficina, elétrica, funilaria...">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="adicionarViatura()">Salvar Viatura</button>
+        <p class="small">
+          Para alterar o status de uma viatura, exclua e cadastre novamente com o novo status.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>Viaturas cadastradas</h2>
+        <table id="tabela-viaturas"></table>
+      </div>
+    </section>
+
+    <!-- =============== SITUAÇÕES =============== -->
+    <section id="tab-situacoes" class="tab">
+      <div class="card">
+        <h2>Lançar Situação do Militar</h2>
+        <div class="grid">
+          <div>
+            <label>Militar</label>
+            <select id="sit-militar"></select>
+          </div>
+          <div>
+            <label>Situação</label>
+            <select id="sit-tipo">
+              <option value="ATESTADO">Atestado</option>
+              <option value="LICENCA">Licença Especial</option>
+              <option value="FOLGA">Folga</option>
+              <option value="FALTA">Falta</option>
+              <option value="OUTRA">Outra</option>
+            </select>
+          </div>
+          <div>
+            <label>Data inicial</label>
+            <input id="sit-inicio" type="date">
+          </div>
+          <div>
+            <label>Data final</label>
+            <input id="sit-fim" type="date">
+          </div>
+        </div>
+        <label>Observação</label>
+        <textarea id="sit-obs" rows="2"></textarea>
+        <button class="btn btn-primary" onclick="salvarSituacao()">Salvar Situação</button>
+        <button class="btn btn-secondary" onclick="cancelarEdicaoSituacao()">Cancelar edição</button>
+      </div>
+
+      <div class="card">
+        <h2>Situações cadastradas</h2>
+        <table id="tabela-situacoes"></table>
+      </div>
+    </section>
+
+    <!-- =============== PLANO DE FÉRIAS (subaba de Situações) =============== -->
+    <section id="tab-ferias" class="tab">
+      <div class="card">
+        <h2>Plano de Férias</h2>
+        <div class="grid">
+          <div>
+            <label>Militar</label>
+            <select id="fer-militar"></select>
+          </div>
+          <div>
+            <label>Início das férias</label>
+            <input id="fer-inicio" type="date">
+          </div>
+          <div>
+            <label>Fim das férias</label>
+            <input id="fer-fim" type="date">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="salvarFerias()">Salvar férias</button>
+        <button class="btn btn-secondary" onclick="cancelarEdicaoFerias()">Cancelar edição</button>
+      </div>
+
+      <div class="card">
+        <h2>Férias registradas</h2>
+        <table id="tabela-ferias"></table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Rodapé com crédito -->
+  <div class="footer-credit no-print">
+    Sistema desenvolvido por Capaverde.
+  </div>
+
+  <script>
+    // ====== STORAGE KEYS ======
+    const LS_MILITARES = 'pmpr2_militares';
+    const LS_VIATURAS  = 'pmpr2_viaturas';
+    const LS_SITUACOES = 'pmpr2_situacoes';
+    const LS_FERIAS    = 'pmpr2_ferias';
+    const LS_CONFIG    = 'pmpr2_config';
+    const LS_LOUSA     = 'pmpr2_lousa';
+
+    let militares = JSON.parse(localStorage.getItem(LS_MILITARES) || '[]');
+    let viaturas  = JSON.parse(localStorage.getItem(LS_VIATURAS)  || '[]');
+    let situacoes = JSON.parse(localStorage.getItem(LS_SITUACOES) || '[]');
+    let ferias    = JSON.parse(localStorage.getItem(LS_FERIAS)    || '[]');
+    let config    = JSON.parse(localStorage.getItem(LS_CONFIG)    || 'null');
+    let lousa     = JSON.parse(localStorage.getItem(LS_LOUSA)     || '[]');
+
+    if (!config) {
+      config = {
+        rpaEquipes: 5,
+        supEquipes: 2,
+        comEquipes: 2,
+        admFuncoes: [
+          {cod:'ADM_ADJUNTO', label:'Adjunto'},
+          {cod:'ADM_SARG',    label:'Sargenteante'},
+          {cod:'ADM_AUXTRANS',label:'Aux. Transportes'}
+        ]
+      };
+    }
+
+    function salvarTudo() {
+      localStorage.setItem(LS_MILITARES, JSON.stringify(militares));
+      localStorage.setItem(LS_VIATURAS,  JSON.stringify(viaturas));
+      localStorage.setItem(LS_SITUACOES, JSON.stringify(situacoes));
+      localStorage.setItem(LS_FERIAS,    JSON.stringify(ferias));
+      localStorage.setItem(LS_CONFIG,    JSON.stringify(config));
+      localStorage.setItem(LS_LOUSA,     JSON.stringify(lousa));
+    }
+
+    // ====== UTIL ======
+    function hojeISO() {
+      const d = new Date();
+      const m = String(d.getMonth()+1).padStart(2,'0');
+      const dia = String(d.getDate()).padStart(2,'0');
+      return d.getFullYear() + '-' + m + '-' + dia;
+    }
+    function formatarDataBR(iso) {
+      if (!iso) return '';
+      const [a,m,d] = iso.split('-');
+      return d+'/'+m+'/'+a;
+    }
+    function textoSetor(setor) {
+      switch (setor) {
+        case 'ADM': return 'Administrativo';
+        case 'RPA': return 'RPA';
+        case 'SUP_TAT': return 'Supletiva/Tático';
+        case 'COM': return 'Comercial';
+        default: return '(não alocado)';
+      }
+    }
+    function textoStatusViatura(cod) {
+      switch (cod) {
+        case '300': return 'Em 300';
+        case 'BX_CIA': return 'Baixada na Cia';
+        case 'BX_OF': return 'Baixada na Oficina';
+        default: return cod || '';
+      }
+    }
+
+    // ====== NAV TABS ======
+    document.querySelectorAll('nav button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = 'tab-' + btn.dataset.tab;
+        if (!document.getElementById(tabId)) return;
+        document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+
+    // ====== SUBTABS (Salvar Informações) ======
+    function initSubtabs() {
+      const btns = document.querySelectorAll('.subtab-btn');
+      btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const alvo = btn.dataset.subtab;
+          btns.forEach(b=>b.classList.remove('active'));
+          document.querySelectorAll('.subtab').forEach(st=>st.classList.remove('active'));
+          btn.classList.add('active');
+          const div = document.getElementById('subtab-' + alvo);
+          if (div) div.classList.add('active');
+        });
+      });
+    }
+
+    // ====== CADASTRO MILITAR ======
+    function adicionarMilitar() {
+      const nome   = document.getElementById('mil-nome').value.trim();
+      const guerra = document.getElementById('mil-guerra').value.trim();
+      const pg     = document.getElementById('mil-pg').value.trim();
+      const fone   = document.getElementById('mil-fone').value.trim();
+      const cpf    = document.getElementById('mil-cpf').value.trim();
+      const end    = document.getElementById('mil-end').value.trim();
+
+      if (!nome || !guerra) {
+        alert('Informe ao menos nome completo e nome de guerra.');
+        return;
+      }
+
+      militares.push({
+        id: Date.now(),
+        nome, guerra, pg, fone, cpf, end,
+        setor: null,
+        equipe: null,
+        subFunc: null,
+        ordemEquipe: null
+      });
+      salvarTudo();
+      limparFormMilitar();
+      desenharMilitares();
+      atualizarCombosMilitares();
+      desenharQuadroGeral();
+      desenharEscalaDia(); // stub
+    }
+
+    function limparFormMilitar() {
+      document.getElementById('mil-nome').value = '';
+      document.getElementById('mil-guerra').value = '';
+      document.getElementById('mil-pg').value = '';
+      document.getElementById('mil-fone').value = '';
+      document.getElementById('mil-cpf').value = '';
+      document.getElementById('mil-end').value = '';
+    }
+
+    function excluirMilitar(id) {
+      if (!confirm('Excluir este militar? Ele será removido do quadro geral e das listas.')) return;
+      militares = militares.filter(m=>m.id!==id);
+      salvarTudo();
+      desenharMilitares();
+      atualizarCombosMilitares();
+      desenharQuadroGeral();
+      desenharSituacoes();
+      desenharFerias();
+    }
+
+    function desenharMilitares() {
+      const tab = document.getElementById('tabela-militares');
+      tab.innerHTML = `
+        <tr>
+          <th>Nome</th>
+          <th>Guerra</th>
+          <th>Posto/Grad</th>
+          <th>Telefone</th>
+          <th>CPF</th>
+          <th>Endereço</th>
+          <th>Modalidade</th>
+          <th>Ações</th>
+        </tr>
+      `;
+      militares.slice().sort((a,b)=>a.nome.localeCompare(b.nome)).forEach(m => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${m.nome}</td>
+          <td>${m.guerra}</td>
+          <td>${m.pg || ''}</td>
+          <td>${m.fone || ''}</td>
+          <td>${m.cpf || ''}</td>
+          <td>${m.end || ''}</td>
+          <td>${textoSetor(m.setor)}</td>
+          <td>
+            <button class="btn btn-danger" style="padding:2px 6px;font-size:11px;"
+              onclick="excluirMilitar(${m.id})">Excluir</button>
+          </td>
+        `;
+        tab.appendChild(tr);
+      });
+    }
+
+    // ====== QUADRO GERAL ======
+    function militaresDisponiveisParaAlocacao() {
+      return militares.filter(m => !m.setor);
+    }
+
+    function alocarMilitar(setor, equipe, subFunc, militarId) {
+      const m = militares.find(x=>x.id===parseInt(militarId));
+      if (!m) return;
+      m.setor   = setor;
+      m.equipe  = equipe || null;
+      m.subFunc = subFunc || null;
+      m.ordemEquipe = null;
+      salvarTudo();
+      desenharQuadroGeral();
+      desenharMilitares();
+      desenharEscalaDia(); // stub
+    }
+
+    function removerDeSetor(militarId) {
+      const m = militares.find(x=>x.id===militarId);
+      if (!m) return;
+      m.setor = null;
+      m.equipe = null;
+      m.subFunc = null;
+      m.ordemEquipe = null;
+      salvarTudo();
+      desenharQuadroGeral();
+      desenharMilitares();
+      desenharEscalaDia(); // stub
+    }
+
+    function obterSituacaoPrincipal(milId, dataISO) {
+      const ativas = situacoes.filter(s=>{
+        if (s.militarId!==milId) return false;
+        const ini = s.inicio;
+        const fim = s.fim || s.inicio;
+        return dataISO>=ini && dataISO<=fim;
+      });
+      if (ativas.length===0) return {codigo:'ATIVO', texto:'Ativo', badge:'ok'};
+
+      const ordem = ['FERIAS','ATESTADO','LICENCA','FOLGA','FALTA','OUTRA'];
+      let esc = ativas[0];
+      ativas.forEach(s=>{
+        if (ordem.indexOf(s.tipo) < ordem.indexOf(esc.tipo)) esc = s;
+      });
+
+      let texto=''; let badge='alert';
+      switch (esc.tipo) {
+        case 'FERIAS': texto='Férias'; badge='bx'; break;
+        case 'ATESTADO': texto='Atestado'; badge='bx'; break;
+        case 'LICENCA': texto='Licença'; badge='bx'; break;
+        case 'FOLGA': texto='Folga'; badge='alert'; break;
+        case 'FALTA': texto='Falta'; badge='alert'; break;
+        default: texto='Outra'; badge='alert';
+      }
+      return {codigo:esc.tipo, texto, badge};
+    }
+
+    // ---- Drag & Drop para RPA ----
+    let rpaDragOrigem = {equipe:null, militarId:null};
+
+    function iniciarArrastoRPA(equipe, militarId) {
+      rpaDragOrigem = {equipe, militarId};
+    }
+
+    function orderByOrdemNome(a,b) {
+      const oa = (typeof a.ordemEquipe === 'number') ? a.ordemEquipe : 0;
+      const ob = (typeof b.ordemEquipe === 'number') ? b.ordemEquipe : 0;
+      if (oa !== ob) return oa - ob;
+      return a.nome.localeCompare(b.nome);
+    }
+
+    function finalizarArrastoRPA(equipeDestino, militarIdDestino) {
+      if (!rpaDragOrigem.militarId) return;
+      if (equipeDestino !== rpaDragOrigem.equipe) return;
+      const eq = equipeDestino;
+      let membros = militares.filter(m=>m.setor==='RPA' && m.equipe===eq && m.subFunc!=='PERM_RPA');
+      membros.sort(orderByOrdemNome);
+      const ids = membros.map(m=>m.id);
+      const fromIndex = ids.indexOf(rpaDragOrigem.militarId);
+      const toIndex   = ids.indexOf(militarIdDestino);
+      if (fromIndex === -1 || toIndex === -1) return;
+      ids.splice(toIndex, 0, ids.splice(fromIndex,1)[0]);
+      ids.forEach((id, idx)=>{
+        const mil = militares.find(m=>m.id===id);
+        if (mil) mil.ordemEquipe = idx;
+      });
+      salvarTudo();
+      desenharQuadroGeral();
+      rpaDragOrigem = {equipe:null, militarId:null};
+    }
+
+    function gerarEquipesRPA(qtd) {
+      const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      return letras.slice(0, Math.max(1,qtd)).split('');
+    }
+
+    function ajustarEquipesSetor(setor, antigo, novo) {
+      if (novo >= antigo) return;
+      if (setor === 'RPA') {
+        const letrasAntigas = gerarEquipesRPA(antigo);
+        const letrasNovas   = gerarEquipesRPA(novo);
+        const remover = letrasAntigas.filter(l=>!letrasNovas.includes(l));
+        militares.forEach(m=>{
+          if (m.setor==='RPA' && remover.includes(m.equipe)) {
+            m.setor=null; m.equipe=null; m.subFunc=null; m.ordemEquipe=null;
+          }
+        });
+      } else if (setor === 'SUP_TAT' || setor === 'COM') {
+        militares.forEach(m=>{
+          if (m.setor===setor && parseInt(m.equipe)>novo) {
+            m.setor=null; m.equipe=null; m.subFunc=null; m.ordemEquipe=null;
+          }
+        });
+      }
+      salvarTudo();
+    }
+
+    function adicionarFuncaoADM() {
+      const inp = document.getElementById('cfg-adm-nova');
+      const label = (inp.value || '').trim();
+      if (!label) return;
+      const base = 'ADM_' + label.toUpperCase().replace(/[^A-Z0-9]+/g,'_');
+      let cod = base;
+      let i = 1;
+      while (config.admFuncoes.some(f=>f.cod===cod)) {
+        cod = base + '_' + (i++);
+      }
+      config.admFuncoes.push({cod, label});
+      inp.value = '';
+      salvarTudo();
+      desenharQuadroGeral();
+    }
+
+    function removerFuncaoADM(cod) {
+      if (!confirm('Remover esta função administrativa? Os militares nela voltam a ficar disponíveis.')) return;
+      militares.forEach(m=>{
+        if (m.setor==='ADM' && m.subFunc===cod) {
+          m.setor=null; m.equipe=null; m.subFunc=null; m.ordemEquipe=null;
+        }
+      });
+      config.admFuncoes = config.admFuncoes.filter(f=>f.cod!==cod);
+      salvarTudo();
+      desenharQuadroGeral();
+      desenharMilitares();
+    }
+
+    function desenharConfigQuadro() {
+      const div = document.getElementById('quadro-config');
+      if (!div) return;
+      div.innerHTML = `
+        <div class="grid">
+          <div>
+            <label>RPA – quantidade de equipes</label>
+            <input id="cfg-rpa-eq" type="number" min="1" max="10" value="${config.rpaEquipes}">
+          </div>
+          <div>
+            <label>Supletiva/Tático – qtd equipes</label>
+            <input id="cfg-sup-eq" type="number" min="1" max="10" value="${config.supEquipes}">
+          </div>
+          <div>
+            <label>Comercial – qtd equipes</label>
+            <input id="cfg-com-eq" type="number" min="1" max="10" value="${config.comEquipes}">
+          </div>
+        </div>
+        <div style="margin-top:8px;">
+          <label>Funções do Administrativo</label>
+          <ul id="cfg-adm-funcoes-list" style="list-style:none;padding-left:0;margin:4px 0;"></ul>
+          <div class="grid">
+            <div>
+              <input id="cfg-adm-nova" type="text" placeholder="Nova função (ex.: P/1, Protocolo)">
+            </div>
+            <div>
+              <button class="btn btn-secondary" onclick="adicionarFuncaoADM()">Adicionar função ADM</button>
+            </div>
+          </div>
+          <p class="small">Use o X ao lado da função para removê-la (os militares nela voltam a ficar disponíveis).</p>
+        </div>
+      `;
+
+      document.getElementById('cfg-rpa-eq').addEventListener('change', e=>{
+        const novo = Math.max(1, Math.min(10, parseInt(e.target.value)||1));
+        if (novo === config.rpaEquipes) return;
+        ajustarEquipesSetor('RPA', config.rpaEquipes, novo);
+        config.rpaEquipes = novo;
+        salvarTudo();
+        desenharQuadroGeral();
+      });
+
+      document.getElementById('cfg-sup-eq').addEventListener('change', e=>{
+        const novo = Math.max(1, Math.min(10, parseInt(e.target.value)||1));
+        if (novo === config.supEquipes) return;
+        ajustarEquipesSetor('SUP_TAT', config.supEquipes, novo);
+        config.supEquipes = novo;
+        salvarTudo();
+        desenharQuadroGeral();
+      });
+
+      document.getElementById('cfg-com-eq').addEventListener('change', e=>{
+        const novo = Math.max(1, Math.min(10, parseInt(e.target.value)||1));
+        if (novo === config.comEquipes) return;
+        ajustarEquipesSetor('COM', config.comEquipes, novo);
+        config.comEquipes = novo;
+        salvarTudo();
+        desenharQuadroGeral();
+      });
+
+      const ul = document.getElementById('cfg-adm-funcoes-list');
+      config.admFuncoes.forEach(f=>{
+        const li = document.createElement('li');
+        li.style.fontSize = '12px';
+        li.innerHTML = `
+          ${f.label}
+          <button class="btn btn-secondary" style="padding:1px 4px;font-size:10px;"
+            onclick="removerFuncaoADM('${f.cod}')">X</button>
+        `;
+        ul.appendChild(li);
+      });
+    }
+
+    function desenharQuadroGeral() {
+      const dataRef = hojeISO();
+
+      // RESUMO DE EFETIVO
+      let total = militares.length;
+      let indisp = 0, atestado = 0, licenca = 0, feriasCount = 0;
+      militares.forEach(m=>{
+        const sit = obterSituacaoPrincipal(m.id, dataRef);
+        if (sit.codigo !== 'ATIVO') {
+          indisp++;
+          if (sit.codigo === 'ATESTADO') atestado++;
+          if (sit.codigo === 'LICENCA') licenca++;
+          if (sit.codigo === 'FERIAS') feriasCount++;
+        }
+      });
+      const disp = total - indisp;
+      const resDiv = document.getElementById('quadro-resumo');
+      resDiv.innerHTML = `
+        <div><strong>Total:</strong> ${total}</div>
+        <div><strong>Disponíveis:</strong> <span class="badge badge-ok">${disp}</span></div>
+        <div><strong>Indisponíveis:</strong> <span class="badge badge-bx">${indisp}</span></div>
+        <div><strong>Atestado:</strong> ${atestado}</div>
+        <div><strong>Licença:</strong> ${licenca}</div>
+        <div><strong>Férias:</strong> ${feriasCount}</div>
+      `;
+
+      // CONFIGURAÇÃO (na subaba Ajuste de Equipes)
+      desenharConfigQuadro();
+
+      // ----- COMANDANTE -----
+      const cmdDiv = document.getElementById('quadro-comandante');
+      cmdDiv.innerHTML = '';
+      const atual = militares.find(m=>m.setor==='ADM' && m.subFunc==='ADM_COMANDO');
+      const info = document.createElement('div');
+      if (atual) {
+        const sit = obterSituacaoPrincipal(atual.id, dataRef);
+        let badgeClass = 'badge-ok';
+        if (sit.badge==='alert') badgeClass='badge-alert';
+        if (sit.badge==='bx') badgeClass='badge-bx';
+        info.innerHTML = `
+          <div><strong>${atual.pg || ''} ${atual.guerra}</strong></div>
+          <div class="small">
+            <span class="badge ${badgeClass}">${sit.texto}</span>
+          </div>
+          <button class="btn btn-secondary" style="padding:2px 6px;font-size:11px;margin-top:4px;"
+            onclick="removerDeSetor(${atual.id})">Remover</button>
+        `;
+      } else {
+        info.innerHTML = `<div class="small">Nenhum comandante definido.</div>`;
+      }
+      cmdDiv.appendChild(info);
+
+      const selCmd = document.createElement('select');
+      const opCmd0 = document.createElement('option');
+      opCmd0.value = '';
+      opCmd0.textContent = 'Definir / trocar comandante';
+      selCmd.appendChild(opCmd0);
+      militaresDisponiveisParaAlocacao().slice().sort((a,b)=>a.nome.localeCompare(b.nome)).forEach(m=>{
+        const op = document.createElement('option');
+        op.value = m.id;
+        op.textContent = (m.pg||'')+' '+m.guerra;
+        selCmd.appendChild(op);
+      });
+      selCmd.onchange = function(){
+        if (this.value) {
+          alocarMilitar('ADM', null, 'ADM_COMANDO', this.value);
+          this.value='';
+        }
+      };
+      cmdDiv.appendChild(selCmd);
+
+      // ----- RPA -----
+      const containerRPA = document.getElementById('quadro-rpa');
+      containerRPA.innerHTML = '';
+      const equipesRPA = gerarEquipesRPA(config.rpaEquipes);
+      equipesRPA.forEach(eq=>{
+        const box = document.createElement('div');
+        box.className = 'quadro-equipe';
+        box.innerHTML = `<h4>Equipe ${eq}</h4>`;
+        const ul = document.createElement('ul');
+
+        const perm = militares.find(m=>m.setor==='RPA' && m.equipe===eq && m.subFunc==='PERM_RPA');
+        if (perm) {
+          const sit = obterSituacaoPrincipal(perm.id, dataRef);
+          let badgeClass='badge-ok';
+          if (sit.badge==='alert') badgeClass='badge-alert';
+          if (sit.badge==='bx') badgeClass='badge-bx';
+          const liPerm = document.createElement('li');
+          liPerm.innerHTML = `
+            <strong>Permanência</strong> – ${perm.pg || ''} ${perm.guerra}
+            <span class="badge ${badgeClass}">${sit.texto}</span>
+            <button class="btn btn-secondary" style="padding:1px 4px;font-size:10px;"
+              onclick="removerDeSetor(${perm.id})">X</button>
+          `;
+          ul.appendChild(liPerm);
+        }
+
+        let normais = militares.filter(m=>m.setor==='RPA' && m.equipe===eq && m.subFunc!=='PERM_RPA');
+        normais.sort(orderByOrdemNome);
+        if (normais.some(m=>typeof m.ordemEquipe!=='number')) {
+          normais.forEach((m,idx)=>{ m.ordemEquipe = idx; });
+          salvarTudo();
+        }
+
+        normais.forEach(m=>{
+          const sit = obterSituacaoPrincipal(m.id, dataRef);
+          let badgeClass='badge-ok';
+          if (sit.badge==='alert') badgeClass='badge-alert';
+          if (sit.badge==='bx') badgeClass='badge-bx';
+          const li = document.createElement('li');
+          li.textContent = (m.pg || '')+' '+m.guerra + ' ';
+          const span = document.createElement('span');
+          span.className = 'badge '+badgeClass;
+          span.textContent = sit.texto;
+          li.appendChild(span);
+
+          const btnX = document.createElement('button');
+          btnX.className = 'btn btn-secondary';
+          btnX.style.padding = '1px 4px';
+          btnX.style.fontSize = '10px';
+          btnX.textContent = 'X';
+          btnX.onclick = ()=>removerDeSetor(m.id);
+          li.appendChild(btnX);
+
+          li.draggable = true;
+          li.addEventListener('dragstart', ()=>iniciarArrastoRPA(eq, m.id));
+          li.addEventListener('dragover', ev=>ev.preventDefault());
+          li.addEventListener('drop', ev=>{
+            ev.preventDefault();
+            finalizarArrastoRPA(eq, m.id);
+          });
+
+          ul.appendChild(li);
+        });
+
+        box.appendChild(ul);
+
+        const selAdd = document.createElement('select');
+        const op0 = document.createElement('option');
+        op0.value = '';
+        op0.textContent = 'Adicionar militar';
+        selAdd.appendChild(op0);
+        militaresDisponiveisParaAlocacao().slice().sort((a,b)=>a.nome.localeCompare(b.nome)).forEach(m=>{
+          const op = document.createElement('option');
+          op.value = m.id;
+          op.textContent = (m.pg||'')+' '+m.guerra;
+          selAdd.appendChild(op);
+        });
+        selAdd.onchange = function(){
+          if (this.value) {
+            alocarMilitar('RPA', eq, null, this.value);
+            this.value='';
+          }
+        };
+        box.appendChild(selAdd);
+
+        const selPerm = document.createElement('select');
+        const opP0 = document.createElement('option');
+        opP0.value='';
+        opP0.textContent='Definir Permanência';
+        selPerm.appendChild(opP0);
+        militaresDisponiveisParaAlocacao().slice().sort((a,b)=>a.nome.localeCompare(b.nome)).forEach(m=>{
+          const op = document.createElement('option');
+          op.value = m.id;
+          op.textContent = (m.pg||'')+' '+m.guerra;
+          selPerm.appendChild(op);
+        });
+        selPerm.onchange = function(){
+          if (this.value) {
+            alocarMilitar('RPA', eq, 'PERM_RPA', this.value);
+            this.value='';
+          }
+        };
+        box.appendChild(selPerm);
+
+        containerRPA.appendChild(box);
+      });
+
+      // ----- ADM FUNÇÕES (sem Comandante) -----
+      const contAdm = document.getElementById('quadro-adm-funcoes');
+      contAdm.innerHTML = '';
+      config.admFuncoes.forEach(f=>{
+        const box = document.createElement('div');
+        box.className='quadro-equipe';
+        box.innerHTML = `<h4>${f.label}</h4>`;
+        const ul = document.createElement('ul');
+
+        militares
+          .filter(m=>m.setor==='ADM' && m.subFunc===f.cod)
+          .sort((a,b)=>a.nome.localeCompare(b.nome))
+          .forEach(m=>{
+            const sit = obterSituacaoPrincipal(m.id,dataRef);
+            let badgeClass='badge-ok';
+            if (sit.badge==='alert') badgeClass='badge-alert';
+            if (sit.badge==='bx') badgeClass='badge-bx';
+            const li = document.createElement('li');
+            li.innerHTML = `
+              ${m.pg || ''} ${m.guerra}
+              <span class="badge ${badgeClass}">${sit.texto}</span>
+              <button class="btn btn-secondary" style="padding:1px 4px;font-size:10px;"
+                onclick="removerDeSetor(${m.id})">X</button>
+            `;
+            ul.appendChild(li);
+          });
+        box.appendChild(ul);
+
+        const sel = document.createElement('select');
+        const op0 = document.createElement('option');
+        op0.value=''; op0.textContent='Adicionar militar';
+        sel.appendChild(op0);
+        militaresDisponiveisParaAlocacao().slice().sort((a,b)=>a.nome.localeCompare(b.nome)).forEach(m=>{
+          const op = document.createElement('option');
+          op.value = m.id;
+          op.textContent = (m.pg||'')+' '+m.guerra;
+          sel.appendChild(op);
+        });
+        sel.onchange = function(){
+          if (this.value) {
+            alocarMilitar('ADM', null, f.cod, this.value);
+            this.value='';
+          }
+        };
+        box.appendChild(sel);
+
+        contAdm.appendChild(box);
+      });
+
+      // ----- SUPLETIVA / TÁTICO -----
+      const contSup = document.getElementById('quadro-suptat');
+      contSup.innerHTML = '';
+      for (let i=1;i<=config.supEquipes;i++) {
+        const eq = String(i);
+        const box = document.createElement('div');
+        box.className='quadro-equipe';
+        box.innerHTML = `<h4>Equipe ${eq}</h4>`;
+        const ul = document.createElement('ul');
+        militares
+          .filter(m=>m.setor==='SUP_TAT' && m.equipe===eq)
+          .sort((a,b)=>a.nome.localeCompare(b.nome))
+          .forEach(m=>{
+            const sit = obterSituacaoPrincipal(m.id,dataRef);
+            let badgeClass='badge-ok';
+            if (sit.badge==='alert') badgeClass='badge-alert';
+            if (sit.badge==='bx') badgeClass='badge-bx';
+            const li = document.createElement('li');
+            li.innerHTML = `
+              ${m.pg || ''} ${m.guerra}
+              <span class="badge ${badgeClass}">${sit.texto}</span>
+              <button class="btn btn-secondary" style="padding:1px 4px;font-size:10px;"
+                onclick="removerDeSetor(${m.id})">X</button>
+            `;
+            ul.appendChild(li);
+          });
+        box.appendChild(ul);
+
+        const sel = document.createElement('select');
+        const op0 = document.createElement('option');
+        op0.value=''; op0.textContent='Adicionar militar';
+        sel.appendChild(op0);
+        militaresDisponiveisParaAlocacao().slice().sort((a,b)=>a.nome.localeCompare(b.nome)).forEach(m=>{
+          const op = document.createElement('option');
+          op.value = m.id;
+          op.textContent = (m.pg||'')+' '+m.guerra;
+          sel.appendChild(op);
+        });
+        sel.onchange = function(){
+          if (this.value) {
+            alocarMilitar('SUP_TAT', eq, null, this.value);
+            this.value='';
+          }
+        };
+        box.appendChild(sel);
+
+        contSup.appendChild(box);
+      }
+
+      // ----- COMERCIAL -----
+      const contCom = document.getElementById('quadro-com');
+      contCom.innerHTML = '';
+      for (let i=1;i<=config.comEquipes;i++) {
+        const eq = String(i);
+        const box = document.createElement('div');
+        box.className='quadro-equipe';
+        box.innerHTML = `<h4>Equipe ${eq}</h4>`;
+        const ul = document.createElement('ul');
+        militares
+          .filter(m=>m.setor==='COM' && m.equipe===eq)
+          .sort((a,b)=>a.nome.localeCompare(b.nome))
+          .forEach(m=>{
+            const sit = obterSituacaoPrincipal(m.id,dataRef);
+            let badgeClass='badge-ok';
+            if (sit.badge==='alert') badgeClass='badge-alert';
+            if (sit.badge==='bx') badgeClass='badge-bx';
+            const li = document.createElement('li');
+            li.innerHTML = `
+              ${m.pg || ''} ${m.guerra}
+              <span class="badge ${badgeClass}">${sit.texto}</span>
+              <button class="btn btn-secondary" style="padding:1px 4px;font-size:10px;"
+                onclick="removerDeSetor(${m.id})">X</button>
+            `;
+            ul.appendChild(li);
+          });
+        box.appendChild(ul);
+
+        const sel = document.createElement('select');
+        const op0 = document.createElement('option');
+        op0.value=''; op0.textContent='Adicionar militar';
+        sel.appendChild(op0);
+        militaresDisponiveisParaAlocacao().slice().sort((a,b)=>a.nome.localeCompare(b.nome)).forEach(m=>{
+          const op = document.createElement('option');
+          op.value = m.id;
+          op.textContent = (m.pg||'')+' '+m.guerra;
+          sel.appendChild(op);
+        });
+        sel.onchange = function(){
+          if (this.value) {
+            alocarMilitar('COM', eq, null, this.value);
+            this.value='';
+          }
+        };
+        box.appendChild(sel);
+
+        contCom.appendChild(box);
+      }
+
+      // ----- INDISPONÍVEIS HOJE -----
+      const tabInd = document.getElementById('quadro-indisp');
+      tabInd.innerHTML = `
+        <tr>
+          <th>Militar</th>
+          <th>Situação</th>
+          <th>Início</th>
+          <th>Fim</th>
+        </tr>
+      `;
+      situacoes
+        .filter(s=>{
+          const ini = s.inicio;
+          const fim = s.fim || s.inicio;
+          return dataRef>=ini && dataRef<=fim;
+        })
+        .forEach(s=>{
+          const m = militares.find(x=>x.id===s.militarId);
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${m ? (m.pg||'')+' '+m.guerra : '(removido)'}</td>
+            <td>${s.tipo}</td>
+            <td>${formatarDataBR(s.inicio)}</td>
+            <td>${formatarDataBR(s.fim)}</td>
+          `;
+          tabInd.appendChild(tr);
+        });
+    }
+
+    // ====== VIATURAS ======
+    function adicionarViatura() {
+      const prefixo = document.getElementById('vtr-prefixo').value.trim();
+      const status  = document.getElementById('vtr-status').value;
+      const obs     = document.getElementById('vtr-obs').value.trim();
+
+      if (!prefixo) {
+        alert('Informe o prefixo da viatura.');
+        return;
+      }
+
+      viaturas.push({
+        id: Date.now(),
+        prefixo,
+        status,
+        obs
+      });
+      salvarTudo();
+      document.getElementById('vtr-prefixo').value = '';
+      document.getElementById('vtr-status').value = '300';
+      document.getElementById('vtr-obs').value = '';
+      desenharViaturas();
+      desenharEscalaDia(); // stub
+    }
+
+    function excluirViatura(id) {
+      if (!confirm('Remover esta viatura?')) return;
+      viaturas = viaturas.filter(v=>v.id!==id);
+      salvarTudo();
+      desenharViaturas();
+      desenharEscalaDia(); // stub
+    }
+
+    function desenharViaturas() {
+      const tab = document.getElementById('tabela-viaturas');
+      tab.innerHTML = `
+        <tr>
+          <th>Prefixo</th>
+          <th>Status</th>
+          <th>Observação</th>
+          <th>Ações</th>
+        </tr>
+      `;
+      viaturas.slice().sort((a,b)=>a.prefixo.localeCompare(b.prefixo)).forEach(v=>{
+        const tr = document.createElement('tr');
+        const statusLabel = textoStatusViatura(v.status);
+        const badgeClass = v.status === '300' ? 'badge-ok' : 'badge-bx';
+        tr.innerHTML = `
+          <td>${v.prefixo}</td>
+          <td><span class="badge ${badgeClass}">${statusLabel}</span></td>
+          <td>${v.obs || ''}</td>
+          <td>
+            <button class="btn btn-danger" style="padding:2px 6px;font-size:11px;"
+              onclick="excluirViatura(${v.id})">Excluir</button>
+          </td>
+        `;
+        tab.appendChild(tr);
+      });
+    }
+
+    function viaturasDisponiveis() {
+      return viaturas.filter(v=>v.status==='300');
+    }
+
+    // ====== SITUAÇÕES ======
+    let situacaoEdicaoId = null;
+
+    function salvarSituacao() {
+      const milId  = parseInt(document.getElementById('sit-militar').value);
+      const tipo   = document.getElementById('sit-tipo').value;
+      const inicio = document.getElementById('sit-inicio').value;
+      const fim    = document.getElementById('sit-fim').value || inicio;
+      const obs    = document.getElementById('sit-obs').value.trim();
+
+      if (!milId || !inicio) {
+        alert('Selecione o militar e informe a data inicial.');
+        return;
+      }
+
+      if (situacaoEdicaoId) {
+        const s = situacoes.find(x=>x.id===situacaoEdicaoId);
+        if (s) {
+          s.militarId = milId;
+          s.tipo = tipo;
+          s.inicio = inicio;
+          s.fim = fim;
+          s.obs = obs;
+        }
+        situacaoEdicaoId = null;
+      } else {
+        situacoes.push({
+          id: Date.now(),
+          militarId: milId,
+          tipo,
+          inicio,
+          fim,
+          obs
+        });
+      }
+
+      salvarTudo();
+      desenharSituacoes();
+      desenharQuadroGeral();
+      desenharEscalaDia(); // stub
+      document.getElementById('sit-obs').value = '';
+    }
+
+    function editarSituacao(id) {
+      const s = situacoes.find(x=>x.id===id);
+      if (!s) return;
+      situacaoEdicaoId = id;
+      document.getElementById('sit-militar').value = s.militarId;
+      document.getElementById('sit-tipo').value = s.tipo;
+      document.getElementById('sit-inicio').value = s.inicio;
+      document.getElementById('sit-fim').value = s.fim;
+      document.getElementById('sit-obs').value = s.obs || '';
+    }
+
+    function cancelarEdicaoSituacao() {
+      situacaoEdicaoId = null;
+      document.getElementById('sit-militar').value = '';
+      document.getElementById('sit-tipo').value = 'ATESTADO';
+      document.getElementById('sit-inicio').value = '';
+      document.getElementById('sit-fim').value = '';
+      document.getElementById('sit-obs').value = '';
+    }
+
+    function excluirSituacao(id) {
+      if (!confirm('Excluir esta situação?')) return;
+      situacoes = situacoes.filter(s=>s.id!==id);
+      salvarTudo();
+      desenharSituacoes();
+      desenharQuadroGeral();
+      desenharEscalaDia(); // stub
+    }
+
+    function desenharSituacoes() {
+      const tab = document.getElementById('tabela-situacoes');
+      tab.innerHTML = `
+        <tr>
+          <th>Militar</th>
+          <th>Situação</th>
+          <th>Início</th>
+          <th>Fim</th>
+          <th>Obs.</th>
+          <th>Ações</th>
+        </tr>
+      `;
+      situacoes.slice().sort((a,b)=>(a.inicio||'').localeCompare(b.inicio||'')).forEach(s=>{
+        const m = militares.find(x=>x.id===s.militarId);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${m ? (m.pg||'')+' '+m.guerra : '(removido)'}</td>
+          <td>${s.tipo}</td>
+          <td>${formatarDataBR(s.inicio)}</td>
+          <td>${formatarDataBR(s.fim)}</td>
+          <td>${s.obs || ''}</td>
+          <td>
+            <button class="btn btn-secondary" style="padding:2px 6px;font-size:11px;"
+              onclick="editarSituacao(${s.id})">Editar</button>
+            <button class="btn btn-danger" style="padding:2px 6px;font-size:11px;"
+              onclick="excluirSituacao(${s.id})">Excluir</button>
+          </td>
+        `;
+        tab.appendChild(tr);
+      });
+    }
+
+    // ====== FÉRIAS (PLANO DE FÉRIAS) ======
+    let feriasEdicaoId = null;
+
+    function salvarFerias() {
+      const milId  = parseInt(document.getElementById('fer-militar').value);
+      const inicio = document.getElementById('fer-inicio').value;
+      const fim    = document.getElementById('fer-fim').value;
+
+      if (!milId || !inicio || !fim) {
+        alert('Selecione o militar e preencha início e fim das férias.');
+        return;
+      }
+
+      if (feriasEdicaoId) {
+        const f = ferias.find(x=>x.id===feriasEdicaoId);
+        if (f) {
+          f.inicio = inicio;
+          f.fim = fim;
+          const s = situacoes.find(x=>x.id===f.situacaoId);
+          if (s) { s.inicio = inicio; s.fim = fim; }
+        }
+        feriasEdicaoId = null;
+      } else {
+        const sitId = Date.now();
+        situacoes.push({
+          id: sitId,
+          militarId: milId,
+          tipo: 'FERIAS',
+          inicio,
+          fim,
+          obs: 'Lançado pela aba Plano de Férias'
+        });
+        ferias.push({
+          id: sitId+1,
+          militarId: milId,
+          inicio,
+          fim,
+          situacaoId: sitId
+        });
+      }
+
+      salvarTudo();
+      desenharFerias();
+      desenharSituacoes();
+      desenharQuadroGeral();
+      desenharEscalaDia(); // stub
+      cancelarEdicaoFerias();
+    }
+
+    function editarFerias(id) {
+      const f = ferias.find(x=>x.id===id);
+      if (!f) return;
+      feriasEdicaoId = id;
+      document.getElementById('fer-militar').value = f.militarId;
+      document.getElementById('fer-inicio').value = f.inicio;
+      document.getElementById('fer-fim').value = f.fim;
+    }
+
+    function cancelarEdicaoFerias() {
+      feriasEdicaoId = null;
+      document.getElementById('fer-militar').value = '';
+      document.getElementById('fer-inicio').value = '';
+      document.getElementById('fer-fim').value = '';
+    }
+
+    function excluirFerias(id) {
+      if (!confirm('Excluir registro de férias (e situação de FÉRIAS vinculada)?')) return;
+      const f = ferias.find(x=>x.id===id);
+      if (f && f.situacaoId) {
+        situacoes = situacoes.filter(s=>s.id!==f.situacaoId);
+      }
+      ferias = ferias.filter(x=>x.id!==id);
+      salvarTudo();
+      desenharFerias();
+      desenharSituacoes();
+      desenharQuadroGeral();
+      desenharEscalaDia(); // stub
+    }
+
+    function desenharFerias() {
+      const tab = document.getElementById('tabela-ferias');
+      tab.innerHTML = `
+        <tr>
+          <th>Militar</th>
+          <th>Início</th>
+          <th>Fim</th>
+          <th>Ações</th>
+        </tr>
+      `;
+      ferias.slice().sort((a,b)=>(a.inicio||'').localeCompare(b.inicio||'')).forEach(f=>{
+        const m = militares.find(x=>x.id===f.militarId);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${m ? (m.pg||'')+' '+m.guerra : '(removido)'}</td>
+          <td>${formatarDataBR(f.inicio)}</td>
+          <td>${formatarDataBR(f.fim)}</td>
+          <td>
+            <button class="btn btn-secondary" style="padding:2px 6px;font-size:11px;"
+              onclick="editarFerias(${f.id})">Editar</button>
+            <button class="btn btn-danger" style="padding:2px 6px;font-size:11px;"
+              onclick="excluirFerias(${f.id})">Excluir</button>
+          </td>
+        `;
+        tab.appendChild(tr);
+      });
+    }
+
+    // ====== COMBOS MILITARES (Situações / Férias) ======
+    function atualizarCombosMilitares() {
+      const selSit = document.getElementById('sit-militar');
+      const selFer = document.getElementById('fer-militar');
+      [selSit, selFer].forEach(sel=>{
+        sel.innerHTML = '';
+        const op0 = document.createElement('option');
+        op0.value=''; op0.textContent='-- selecione --';
+        sel.appendChild(op0);
+        militares.slice().sort((a,b)=>a.nome.localeCompare(b.nome)).forEach(m=>{
+          const op = document.createElement('option');
+          op.value = m.id;
+          op.textContent = (m.pg||'')+' '+m.guerra;
+          sel.appendChild(op);
+        });
+      });
+    }
+
+    // ====== BACKUP: EXPORTAR / IMPORTAR DADOS ======
+    function exportarDados() {
+      const payload = {
+        militares,
+        viaturas,
+        situacoes,
+        ferias,
+        config,
+        lousa
+      };
+      const blob = new Blob([JSON.stringify(payload)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const hoje = hojeISO();
+      a.href = url;
+      a.download = 'sargenteacao-dados-' + hoje + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function importarDados() {
+      const input = document.getElementById('importar-arquivo');
+      if (!input.files || !input.files[0]) {
+        alert('Escolha um arquivo .json exportado pelo sistema.');
+        return;
+      }
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!data || typeof data !== 'object') {
+            alert('Arquivo inválido.');
+            return;
+          }
+          if (!data.militares || !data.viaturas || !data.situacoes || !data.ferias || !data.config) {
+            const cont = confirm('O arquivo não parece ter o formato completo esperado. Deseja tentar importar assim mesmo?');
+            if (!cont) return;
+          }
+          militares = data.militares || [];
+          viaturas  = data.viaturas  || [];
+          situacoes = data.situacoes || [];
+          ferias    = data.ferias    || [];
+          config    = data.config    || config;
+          lousa     = data.lousa     || [];
+
+          salvarTudo();
+          atualizarCombosMilitares();
+          desenharMilitares();
+          desenharViaturas();
+          desenharSituacoes();
+          desenharFerias();
+          desenharQuadroGeral();
+          desenharEscalaDia(); // stub
+          desenharLousa();
+
+          alert('Dados importados com sucesso!');
+        } catch (err) {
+          console.error(err);
+          alert('Erro ao ler o arquivo. Verifique se é o .json exportado pelo sistema.');
+        }
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+
+    // ====== LOUSA DE TRABALHO ======
+    function adicionarLousaMsg() {
+      const txt = document.getElementById('lousa-texto').value.trim();
+      if (!txt) return;
+      const agora = new Date();
+      const dataISO = agora.toISOString();
+      lousa.unshift({
+        id: Date.now(),
+        texto: txt,
+        data: dataISO
+      });
+      document.getElementById('lousa-texto').value = '';
+      salvarTudo();
+      desenharLousa();
+    }
+
+    function excluirLousaMsg(id) {
+      if (!confirm('Excluir esta anotação da lousa?')) return;
+      lousa = lousa.filter(m=>m.id!==id);
+      salvarTudo();
+      desenharLousa();
+    }
+
+    function desenharLousa() {
+      const div = document.getElementById('lousa-lista');
+      if (!div) return;
+      div.innerHTML = '';
+      if (!lousa.length) {
+        div.innerHTML = '<p class="small">Nenhuma anotação ainda.</p>';
+        return;
+      }
+      lousa.forEach(msg=>{
+        const d = new Date(msg.data);
+        const dataStr = d.toLocaleDateString('pt-BR');
+        const horaStr = d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+        const box = document.createElement('div');
+        box.className = 'lousa-msg';
+        box.innerHTML = `
+          <div class="lousa-meta">
+            <strong>${dataStr}</strong> às ${horaStr}
+            <button class="btn btn-secondary" style="float:right;padding:1px 4px;font-size:10px;"
+              onclick="excluirLousaMsg(${msg.id})">Excluir</button>
+          </div>
+          <div>${msg.texto.replace(/\n/g,'<br>')}</div>
+        `;
+        div.appendChild(box);
+      });
+    }
+
+    // ====== STUB ESCALA (aba foi removida) ======
+    function desenharEscalaDia() { return; }
+
+    // ====== INIT ======
+    window.onload = function() {
+      desenharMilitares();
+      desenharViaturas();
+      desenharSituacoes();
+      desenharFerias();
+      atualizarCombosMilitares();
+      desenharQuadroGeral();
+      desenharEscalaDia(); // stub
+      initSubtabs();
+      desenharLousa();
+    };
+
+    // ====== SERVICE WORKER (PWA) ======
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(err => {
+        console.log('SW falhou:', err);
+      });
+    }
+  </script>
+</body>
+</html>
